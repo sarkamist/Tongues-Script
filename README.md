@@ -9,4 +9,4 @@ A simple script to simulate languages on Roll20 and show the translation only to
 
 # Usage
 Tongues need you to create and define a vocabulary for every language you want.
-In order to create a new language you may use: `!tongues --create (name)`, this command will create a new handout on your campaign named after the language and with its notes section partially filled (as shown in the screenshot).
+In order to create a new language you may use: `!tongues --create [name]`, this command will create a new handout on your campaign named after the language and with its notes section partially filled (as shown in the screenshot).
