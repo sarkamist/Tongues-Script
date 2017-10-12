@@ -1,7 +1,7 @@
 var Tongues = Tongues || (function(){
     'use strict';
     
-    //---- INFO ----//
+    //---- SCRIPT INFO ----//
     
     var script = { name: 'Tongues', version: '2.0.0'},
         languages = {},
