@@ -1,9 +1,9 @@
 var Tongues = Tongues || (function(){
     'use strict';
     
-    //---- SCRIPT INFO ----//
+    //---- INFO ----//
     
-    var script = { name: 'Tongues', version: '2.0.0'},
+    var script = { name: 'Tongues', version: '2.1.0'},
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
@@ -129,7 +129,13 @@ var Tongues = Tongues || (function(){
         sendChat('character|' + speakerId, '[' + languageName + '] ' + translatedText);
         sendChat('Tongues', '/w GM [' + languageName + '] ' + text);
         _.each(languages[languageName].speakers, function(speakerName){
-            sendChat('Tongues', '/w ' + speakerName + ' [' + languageName + '] ' + text);
+            var speaker = findObjs({
+                _type: 'character',
+                name: speakerName,
+            }, {caseInsensitive: true})[0];
+            if (speaker && speaker.get('controlledby')){
+                sendChat('Tongues', '/w ' + speakerName + ' [' + languageName + '] ' + text);
+            }
         });
     },
     
@@ -139,7 +145,7 @@ var Tongues = Tongues || (function(){
         if (character){
             var characterName = character.get('name');
             _.find(speakers, function(speakerName) {
-                if (characterName.includes(speakerName)){
+                if (characterName == speakerName){
                     bool = true;
                     return true;
                 }
