@@ -3,7 +3,7 @@ var Tongues = Tongues || (function(){
     
     //---- INFO ----//
     
-    var script = { name: 'Tongues', version: '2.1.0'},
+    var script = { name: 'Tongues', version: '3.0.0'},
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
@@ -114,6 +114,17 @@ var Tongues = Tongues || (function(){
         }
     },
     
+    wordHash = function(str){
+        var hash = 0, i, chr;
+        if (str.length === 0) return hash;
+        for (i = 0; i < str.length; i++) {
+            chr   = str.charAt(i).toLowerCase().charCodeAt(0);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return Math.abs(hash);
+    },
+    
     translate = function(speakerId, languageName, text){
         var translatedText = text.replace(/([a-z]+)/igm, function(match){
             var n = 1;
@@ -123,7 +134,8 @@ var Tongues = Tongues || (function(){
             if (match.length - n < 0){
                 return match.replace(/[a-z]/ig, '?');
             } else {
-                return matchCase(languages[languageName].words[match.length - n][Math.floor(Math.random() * languages[languageName].words[match.length - n].length)], match);
+                var hash = wordHash(match) % languages[languageName].words[match.length - n].length;
+                return matchCase(languages[languageName].words[match.length - n][hash], match);
             }
         });
         sendChat('character|' + speakerId, '[' + languageName + '] ' + translatedText);
