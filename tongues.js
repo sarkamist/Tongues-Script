@@ -3,7 +3,7 @@ var Tongues = Tongues || (function(){
     
     //---- INFO ----//
     
-    var script = { name: 'Tongues', version: '3.0.0'},
+    var script = { name: 'Tongues', version: '4.0.0'},
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
@@ -31,13 +31,22 @@ var Tongues = Tongues || (function(){
                 languages[languageName].obj.get('notes', function(notes){
                     if (notes && notes != 'null'){
                         var matches = notes.match(/(\[.*?\])/igm);
-                        languages[languageName].words = [];
+                        languages[languageName].dictionary = {};
+                        languages[languageName].vocabulary = [];
                         for (var i = 0; i < matches.length; i++){
-                            if(matches[i] == '[]'){
-                                languages[languageName].words[i] = null;
+                            if(matches[i].match(/(\[.+:.+\])/igm)){
+                                matches[i] = matches[i].replace(/\[([^\[\]]+)\]/ig, '$1');
+                                var words = matches[i].toLowerCase().split(':');
+                                var originals = words[0].split(',');
+                                var translation = words[1];
+                                _.each(originals, function(original){
+                                    languages[languageName].dictionary[original.trim()] = translation.trim();
+                                });
+                            } else if(matches[i] == '[]'){
+                                languages[languageName].vocabulary[i] = null;
                             } else {
-                                matches[i] = matches[i].replace('\[', '').replace('\]', '');
-                                languages[languageName].words[i] = matches[i].split(', ');
+                                matches[i] = matches[i].replace(/\[([^\[\]]+)\]/ig, '$1');
+                                languages[languageName].vocabulary[i] = matches[i].split(', ');
                             }
                         }
                         if (reload){
@@ -45,7 +54,15 @@ var Tongues = Tongues || (function(){
                         }
                         languages[languageName].obj.get('gmnotes', function(gmnotes){
                             if (gmnotes && gmnotes != 'null'){
-                                languages[languageName].speakers = gmnotes.split(', ');
+                                languages[languageName].speakers = [];
+                                var languageSpeakers = gmnotes.split(', ');
+                                _.each(languageSpeakers, function(languageSpeaker){
+                                    languageSpeaker = languageSpeaker.split(':');
+                                    languages[languageName].speakers.push({
+                                        name: languageSpeaker[0].trim(),
+                                        learning: parseInt(languageSpeaker[1].trim())
+                                    });
+                                });
                             } 
                         });
                     }
@@ -79,10 +96,11 @@ var Tongues = Tongues || (function(){
         var newLanguage = createObj('handout', {
             name: 'Tongues: ' + command[3]
         });
-        var text = '';
+        var text = 'Vocabulary: <br>';
         for(var i = 0; i < 14; i++){
             text += command[3] + ' ' + (i+1) + '-letter words: [] <br>'
         }
+        text += '<hr>Dictionary: <br>[Language, Speech, Cant, Dialect: Tongue]<br>[Hello: Goodbye]<br>[Goodbye: Hello]'
         newLanguage.set({
             notes: text
         });
@@ -100,11 +118,16 @@ var Tongues = Tongues || (function(){
             var text = command[3];
             if (languages[languageName] && languages[languageName].obj){
                 if (languages[languageName].speakers){
-                    if (isLanguageSpeaker(speakerId, languages[languageName].speakers)){
-                        translate(speakerId, languageName, text);
+                    var learning = isLanguageSpeaker(speakerId, languages[languageName].speakers);
+                    if (learning){
+                        translate(speakerId, languageName, text, learning);
+                    } else if (!learning && playerIsGM(msg.playerid)) {
+                        translate(speakerId, languageName, text, 100, false);
                     } else {
                         sendChat('Tongues', '/w ' + msg.who + ' That character cannot speak ' + languageName + '!', null, {noarchive:true});
                     }
+                } else if (playerIsGM(msg.playerid)) {
+                    translate(speakerId, languageName, text, 100, false);
                 } else {
                     sendChat('Tongues', '/w ' + msg.who + ' There are no speakers of ' + languageName + '!', null, {noarchive:true});
                 }
@@ -112,6 +135,133 @@ var Tongues = Tongues || (function(){
                 sendChat('Tongues', '/w ' + msg.who + ' ' + languageName + ' does not exist as a Tongues valid language!', null, {noarchive:true});
             }
         }
+    },
+    
+    translate = function(speakerId, languageName, text, learning, translate = true){
+        _.each(Object.keys(languages[languageName].dictionary), function(key){
+            var pattern = new RegExp(key, 'ig');
+            text = text.replace(pattern, function(word){
+                return matchCase(key.replace(/\s/ig, '_'), word);
+            });
+        });
+        var difficulty = [];
+        var translatedText = text.replace(/\$[^\$]+\$|([a-z_]+)/igm, function(word){
+            word = word.replace(/\_/ig, ' ');
+            
+            //NOT TRANSLATED
+            if(word.match(/\$[^\$]+\$/ig)){
+                return word.replace(/\$/ig, '');
+            }
+            
+            //NOT ENOUGH LEARNING TO TRANSLATE
+            var difficulty = (wordHash(word) % 100) + 1;
+            if (learning < difficulty){
+                return word;
+            }
+            
+            //TRANLSATED WITH DICTIONARY
+            if(languages[languageName].dictionary[word.toLowerCase()]){
+                return matchCase(languages[languageName].dictionary[word.toLowerCase()], word);
+            }
+            
+            //TRANSLATED WITH VOCABULARY
+            var n = 1;
+            while (!languages[languageName].vocabulary[word.length - n] && word.length - n >= 0){
+                n++;
+            }
+            if (word.length - n < 0){
+                return word.replace(/[a-z]/ig, '?');
+            } else {
+                var hash = wordHash(word) % languages[languageName].vocabulary[word.length - n].length;
+                return matchCase(languages[languageName].vocabulary[word.length - n][hash], word);
+            }
+        });
+        var originalText = text.replace(/\$[^\$]+\$|([a-z_]+)/igm, function(word){
+            word = word.replace(/\_/ig, ' ');
+            
+            //NOT TRANSLATED
+            if(word.match(/\$[^\$]+\$/ig)){
+                return word.replace(/\$([^\$]+)\$/ig, '<span style="color: RoyalBlue;">$1</span>');
+            }
+            
+            //NOT ENOUGH LEARNING TO TRANSLATE
+            var difficulty = (wordHash(word) % 100) + 1;
+            if (learning < difficulty){
+                return '<span style="color: RoyalBlue;">' + word + '</span>';
+            }
+            
+            //TRANSLATED
+            return word;
+        });
+        sendChat('character|' + speakerId, '[' + languageName + '] ' + translatedText);
+        sendChat('Tongues - GM', '/w GM' + ' [' + languageName + '] ' + originalText);
+        if (translate){
+            _.each(languages[languageName].speakers, function(speaker){
+                var speakerObj = findObjs({
+                    _type: 'character',
+                    name: speaker.name,
+                }, {caseInsensitive: true})[0];
+                if (speakerObj && speakerObj.get('controlledby')){
+                    if (speaker.learning >= 100){
+                        sendChat('Tongues [' + speakerObj.get('name') + ']', '/w ' + speakerObj.get('name') + ' [' + languageName + '] ' + originalText);
+                    } else {
+                        var understoodText = text.replace(/\$[^\$]+\$|([a-z_]+)/igm, function(word){
+                            word = word.replace(/\_/ig, ' ');
+                            
+                            //NOT TRANSLATED
+                            if(word.match(/\$[^\$]+\$/ig)){
+                                return word.replace(/\$([^\$]+)\$/ig, '<span style="color: RoyalBlue;">$1</span>');
+                            }
+                            
+                            //NOT ENOUGH LEARNING TO TRANSLATE
+                            var difficulty = (wordHash(word) % 100) + 1;
+                            if (learning < difficulty){
+                                return '<span style="color: RoyalBlue;">' + word + '</span>';
+                            }
+                            
+                            //NOT ENOUGH LEARNING TO UNDERSTAND
+                            if (speaker.learning < difficulty){
+                                    //TRANLSATED WITH DICTIONARY
+                                    if(languages[languageName].dictionary[word.toLowerCase()]){
+                                        return '<span style="color: FireBrick;">' + matchCase(languages[languageName].dictionary[word.toLowerCase()], word) + '</span>';
+                                    }
+                                    
+                                    //TRANSLATED WITH VOCABULARY
+                                    var n = 1;
+                                    while (!languages[languageName].vocabulary[word.length - n] && word.length - n >= 0){
+                                        n++;
+                                    }
+                                    if (word.length - n < 0){
+                                        return word.replace(/[a-z]/ig, '?');
+                                    } else {
+                                        var hash = wordHash(word) % languages[languageName].vocabulary[word.length - n].length;
+                                        return '<span style="color: FireBrick;">' + matchCase(languages[languageName].vocabulary[word.length - n][hash], word) + '</span>';
+                                    }
+                            }
+                            
+                            //TRANSLATED
+                            return word;
+                        });
+                        sendChat('Tongues', '/w ' + speakerObj.get('name') + ' [' + languageName + '] ' + understoodText);
+                    }
+                }
+            });
+        }
+    },
+    
+    isLanguageSpeaker = function(speakerId, speakers) {
+        var character = getObj('character', speakerId);
+        var learning = null;
+        if (character){
+            var characterName = character.get('name');
+            _.find(speakers, function(speaker) {
+                if (characterName == speaker.name){
+                    learning = speaker.learning;
+                    return true;
+                }
+            });
+        }
+        return learning;
     },
     
     wordHash = function(str){
@@ -123,47 +273,6 @@ var Tongues = Tongues || (function(){
             hash |= 0; // Convert to 32bit integer
         }
         return Math.abs(hash);
-    },
-    
-    translate = function(speakerId, languageName, text){
-        var translatedText = text.replace(/([a-z]+)/igm, function(match){
-            var n = 1;
-            while (!languages[languageName].words[match.length - n] && match.length - n >= 0){
-                n++;
-            }
-            if (match.length - n < 0){
-                return match.replace(/[a-z]/ig, '?');
-            } else {
-                var hash = wordHash(match) % languages[languageName].words[match.length - n].length;
-                return matchCase(languages[languageName].words[match.length - n][hash], match);
-            }
-        });
-        sendChat('character|' + speakerId, '[' + languageName + '] ' + translatedText);
-        sendChat('Tongues', '/w GM [' + languageName + '] ' + text);
-        _.each(languages[languageName].speakers, function(speakerName){
-            var speaker = findObjs({
-                _type: 'character',
-                name: speakerName,
-            }, {caseInsensitive: true})[0];
-            if (speaker && speaker.get('controlledby')){
-                sendChat('Tongues', '/w ' + speakerName + ' [' + languageName + '] ' + text);
-            }
-        });
-    },
-    
-    isLanguageSpeaker = function(speakerId, speakers) {
-        var character = getObj('character', speakerId);
-        var bool = false;
-        if (character){
-            var characterName = character.get('name');
-            _.find(speakers, function(speakerName) {
-                if (characterName == speakerName){
-                    bool = true;
-                    return true;
-                }
-            });
-        }
-        return bool;
     },
     
     matchCase = function(text, pattern) {
