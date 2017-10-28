@@ -58,7 +58,7 @@ var Tongues = Tongues || (function(){
                                 var languageSpeakers = gmnotes.split(',');
                                 _.each(languageSpeakers, function(languageSpeaker){
                                     languageSpeaker = languageSpeaker.split(':');
-                                    if (languageSpeaker[2]){
+                                    if (languageSpeaker[1]){
                                         languages[languageName].speakers.push({
                                             name: languageSpeaker[0].trim(),
                                             learning: parseInt(languageSpeaker[1].trim())
@@ -129,7 +129,7 @@ var Tongues = Tongues || (function(){
                     if (learning){
                         translate(speakerId, languageName, text, learning);
                     } else if (!learning && playerIsGM(msg.playerid)) {
-                        translate(speakerId, languageName, text, 100, false);
+                        translate(speakerId, languageName, text, 100);
                     } else {
                         sendChat('Tongues', '/w ' + msg.who + ' That character cannot speak ' + languageName + '!', null, {noarchive:true});
                     }
