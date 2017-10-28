@@ -3,7 +3,7 @@ var Tongues = Tongues || (function(){
     
     //---- INFO ----//
     
-    var script = { name: 'Tongues', version: '4.0.0'},
+    var script = { name: 'Tongues', version: '4.0.1'},
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
@@ -55,15 +55,22 @@ var Tongues = Tongues || (function(){
                         languages[languageName].obj.get('gmnotes', function(gmnotes){
                             if (gmnotes && gmnotes != 'null'){
                                 languages[languageName].speakers = [];
-                                var languageSpeakers = gmnotes.split(', ');
+                                var languageSpeakers = gmnotes.split(',');
                                 _.each(languageSpeakers, function(languageSpeaker){
                                     languageSpeaker = languageSpeaker.split(':');
-                                    languages[languageName].speakers.push({
-                                        name: languageSpeaker[0].trim(),
-                                        learning: parseInt(languageSpeaker[1].trim())
-                                    });
+                                    if (languageSpeaker[2]){
+                                        languages[languageName].speakers.push({
+                                            name: languageSpeaker[0].trim(),
+                                            learning: parseInt(languageSpeaker[1].trim())
+                                        });
+                                    } else {
+                                        languages[languageName].speakers.push({
+                                            name: languageSpeaker[0].trim(),
+                                            learning: 100
+                                        });
+                                    }
                                 });
-                            } 
+                            }
                         });
                     }
                 });
