@@ -3,7 +3,7 @@ var Tongues = Tongues || (function(){
     
     //---- INFO ----//
     
-    var script = { name: 'Tongues', version: '4.0.1'},
+    var script = { name: 'Tongues', version: '4.1.0'},
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
@@ -152,7 +152,7 @@ var Tongues = Tongues || (function(){
             });
         });
         var difficulty = [];
-        var translatedText = text.replace(/\$[^\$]+\$|([a-z_]+)/igm, function(word){
+        var translatedText = text.replace(/\$[^\$]+\$|([\u00BF-\u1FFF\u2C00-\uD7FF\w_]+)/igm, function(word){
             word = word.replace(/\_/ig, ' ');
             
             //NOT TRANSLATED
@@ -177,13 +177,13 @@ var Tongues = Tongues || (function(){
                 n++;
             }
             if (word.length - n < 0){
-                return word.replace(/[a-z]/ig, '?');
+                return word.replace(/[\u00BF-\u1FFF\u2C00-\uD7FF\w]/ig, '?');
             } else {
                 var hash = wordHash(word) % languages[languageName].vocabulary[word.length - n].length;
                 return matchCase(languages[languageName].vocabulary[word.length - n][hash], word);
             }
         });
-        var originalText = text.replace(/\$[^\$]+\$|([a-z_]+)/igm, function(word){
+        var originalText = text.replace(/\$[^\$]+\$|([\u00BF-\u1FFF\u2C00-\uD7FF\w_]+)/igm, function(word){
             word = word.replace(/\_/ig, ' ');
             
             //NOT TRANSLATED
@@ -212,7 +212,7 @@ var Tongues = Tongues || (function(){
                     if (speaker.learning >= 100){
                         sendChat('Tongues [' + speakerObj.get('name') + ']', '/w ' + speakerObj.get('name') + ' [' + languageName + '] ' + originalText);
                     } else {
-                        var understoodText = text.replace(/\$[^\$]+\$|([a-z_]+)/igm, function(word){
+                        var understoodText = text.replace(/\$[^\$]+\$|([\u00BF-\u1FFF\u2C00-\uD7FF\w_]+)/igm, function(word){
                             word = word.replace(/\_/ig, ' ');
                             
                             //NOT TRANSLATED
@@ -220,7 +220,7 @@ var Tongues = Tongues || (function(){
                                 return word.replace(/\$([^\$]+)\$/ig, '<span style="color: RoyalBlue;">$1</span>');
                             }
                             
-                            //NOT ENOUGH LEARNING TO TRANSLATE
+                            //NOT ENOUGH LEARNING TO UNDERSTAND
                             var difficulty = (wordHash(word) % 100) + 1;
                             if (learning < difficulty){
                                 return '<span style="color: RoyalBlue;">' + word + '</span>';
@@ -239,7 +239,7 @@ var Tongues = Tongues || (function(){
                                         n++;
                                     }
                                     if (word.length - n < 0){
-                                        return word.replace(/[a-z]/ig, '?');
+                                        return word.replace(/[\u00BF-\u1FFF\u2C00-\uD7FF\w]/ig, '?');
                                     } else {
                                         var hash = wordHash(word) % languages[languageName].vocabulary[word.length - n].length;
                                         return '<span style="color: FireBrick;">' + matchCase(languages[languageName].vocabulary[word.length - n][hash], word) + '</span>';
@@ -304,18 +304,22 @@ var Tongues = Tongues || (function(){
         if (msg.type == 'api' && msg.content.startsWith('!tongues ')){
             var regex = /(\![^\ ]+) ([^\ ]+) (.+)/igm;
             var command = regex.exec(msg.content);
-            if(command[2].startsWith("--")){
-                if(playerIsGM(msg.playerid)){
-                    if(command[2] == '--create'){
-                        commandCreate(msg, command);
+            if (command && command[2] && command[3]){
+                if(command[2].startsWith("--")){
+                    if(playerIsGM(msg.playerid)){
+                        if(command[2] == '--create'){
+                            commandCreate(msg, command);
+                        } else {
+                            sendChat('Tongues', '/w ' + msg.who + ' Invalid command!', null, {noarchive:true});
+                        }
                     } else {
-                        sendChat('Tongues', '/w ' + msg.who + ' No valid command!', null, {noarchive:true})
+                        sendChat('Tongues', '/w ' + msg.who + ' Only the GM can access Tongues configuration commands!', null, {noarchive:true});
                     }
                 } else {
-                    sendChat('Tongues', '/w ' + msg.who + ' Only the GM can access Tongues configuration commands!', null, {noarchive:true})
+                    commandSpeak(msg, command);
                 }
             } else {
-                commandSpeak(msg, command);
+                sendChat('Tongues', '/w ' + msg.who + ' Invalid command!', null, {noarchive:true});
             }
         }
     },
