@@ -5,11 +5,6 @@ A simple script to simulate languages on Roll20 and show the translation only to
 1. [Installation](#installation)
 2. [Usage](#usage)
 3. [Available commands](#available-commands)
-   3.1. [!tongues (language) (message)](#tongues-language-message)
-   3.2. [!tongues --create (language)](#tongues---create-language)
-   3.3. [!tongues --ability](#tongues---ability)
-   3.4. [!tongues --set (language:knowledge)](#tongues---set-languageknowledge)
-   3.5. [!tongues --unset (language)](#tongues---unset-language)
 
 # Installation
 - Add a new script on Settings -> API Scripts of the game you want to install the script in
