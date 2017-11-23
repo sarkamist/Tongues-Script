@@ -5,6 +5,11 @@ A simple script to simulate languages on Roll20 and show the translation only to
 1. [Installation](#installation)
 2. [Usage](#usage)
 3. [Available commands](#available-commands)
+   3.1 [!tongues (language) (message)](#tongues-language-message)
+   3.2 [!tongues --create (language)](#tongues---create-language)
+   3.3 [!tongues --ability](#tongues---ability)
+   3.4 [!tongues --set (language:knowledge)](#tongues---set-languageknowledge)
+   3.5 [!tongues --unset (language)](#tongues---unset-language)
 
 # Installation
 - Add a new script on Settings -> API Scripts of the game you want to install the script in
@@ -38,6 +43,7 @@ To remove a language you simply have to delete its handout as the script does no
 ## !tongues (language) (message)
 - **Configuration command:** No
 - **Target required:** Token representing a Character Sheet
+- **Example:** !tongues Draconic I will kill you!
 
 Makes the token speak the message in the provided language if all conditions are met.
 The GM can speak any language regardless of the token being a speaker of the language in which case a knowledge of 100% will be used for the translation.
@@ -45,20 +51,24 @@ The GM always gets the whole original message plus any translation from any Char
 ## !tongues --create (language)
 - **Configuration command:** Yes
 - **Target required:** None
+- **Example:** !tongues --create Draconic
 
 Creates a new handout template named after the provided language.
 ## !tongues --ability
 - **Configuration command:** Yes
 - **Target required:** Token representing a Character Sheet
+- **Example:** !tongues --ability
 
 Creates or updates a token ability named "Tongues" for the selected Character which will list all the languages known by the Character and send a message with the one selected.
-## !tongues --set (language:knowledge)
+## !tongues --set (language:knowledge%)
 - **Configuration command:** Yes
 - **Target required:** Token representing a Character Sheet
+- **Example:** !tongues --set Draconic | !tongues --set Draconic:50%
 
-Adds or updates knowledge of the provided language to the selected Character. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is added.
+Adds or updates knowledge of the provided language to the selected Character. Providing a knowledge % is optional. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is added.
 ## !tongues --unset (language)
 -**Configuration command:** Yes
 -**Target required:** Token representing a Character Sheet
+- **Example:** !tongues --unset Draconic
 
 Removes knowledge of the provided language from the selected Character. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is removed.
