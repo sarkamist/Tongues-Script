@@ -2,9 +2,9 @@
 A simple script to simulate languages on Roll20 and show the translation only to those characters that know the language.
 
 # Index
-1. [Installation]
-2. [Usage]
-3. [Available commands]
+1. [Installation](#installation)
+2. [Usage](#usage)
+3. [Available commands](#available-commands)
 
 # Installation
 - Add a new script on Settings -> API Scripts of the game you want to install the script in
