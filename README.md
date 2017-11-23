@@ -1,6 +1,11 @@
 # Tongues Script
 A simple script to simulate languages on Roll20 and show the translation only to those characters that know the language.
 
+# Index
+1. [Installation]
+2. [Usage]
+3. [Available commands]
+
 # Installation
 - Add a new script on Settings -> API Scripts of the game you want to install the script in
 - Copy the contents of tongues.js on this repository to the new script
@@ -26,3 +31,29 @@ When a speaker sends a message, any words not meet by the knowledge level of the
 Whenever reading a message, any words not meet by the knowledge level of the listener will be displayed with red color and not translated to those who understand the language.
 
 To remove a language you simply have to delete its handout as the script does not use data storage and depends on the campaign's handouts.
+
+# Available commands
+*Note: configuration commands are only available to GM*
+
+## !tongues (language) (message)
+-**Configuration command:** No
+-**Target required:** Token representing a Character Sheet
+Makes the token speak the message in the provided language if all conditions are met.
+The GM can speak any language regardless of the token being a speaker of the language in which case a knowledge of 100% will be used for the translation.
+The GM always gets the whole original message plus any translation from any Character it may be controlling.
+## !tongues --create (language)
+-**Configuration command:** Yes
+-**Target required:** None
+Creates a new handout template named after the provided language.
+## !tongues --ability
+-**Configuration command:** Yes
+-**Target required:** Token representing a Character Sheet
+Creates or updates a token ability named "Tongues" for the selected Character which will list all the languages known by the Character and send a message with the one selected.
+## !tongues --set (language:knowledge)
+-**Configuration command:** Yes
+-**Target required:** Token representing a Character Sheet
+Adds or updates knowledge of the provided language to the selected Character. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is added.
+## !tongues --unset (language)
+-**Configuration command:** Yes
+-**Target required:** Token representing a Character Sheet
+Removes knowledge of the provided language from the selected Character. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is removed.
