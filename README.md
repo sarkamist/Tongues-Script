@@ -55,7 +55,7 @@ Creates a new handout template named after the provided language.
 - **Example:** !tongues --ability
 
 Creates or updates a token ability named "Tongues" for the selected Character which will list all the languages known by the Character and send a message with the one selected.
-## !tongues --set (language:knowledge%)
+## !tongues --set (language:knowledge:%)
 - **Configuration command:** Yes
 - **Target required:** Token representing a Character Sheet
 - **Example:** !tongues --set Draconic | !tongues --set Draconic:50%
