@@ -60,10 +60,17 @@ Creates or updates a token ability named "Tongues" for the selected Character wh
 - **Target required:** Token representing a Character Sheet
 - **Example:** !tongues --set Draconic | !tongues --set Draconic:50%
 
-Adds or updates knowledge of the provided language to the selected Character. Providing a knowledge % is optional. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is added.
+Adds or updates knowledge of the provided language to the selected Character. Providing a knowledge % is optional. If the character has an ability named "Tongues" this command will run a ***!tongues --ability*** command for the selected Character once language knowledge is added.
 ## !tongues --unset (language)
 -**Configuration command:** Yes
 -**Target required:** Token representing a Character Sheet
 - **Example:** !tongues --unset Draconic
 
 Removes knowledge of the provided language from the selected Character. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is removed.
+## !tongues --speaker (name)
+-**Configuration command:** Yes
+-**Target required:** None
+- **Example:** !tongues --speaker Elminster Aumar
+
+Saved the provided name to the script's state storage for later use. Whenever a ***!tongues (language) (message)*** is issued by a GM without a token selected, the script will display the stored name. Defaults to ***John Smith*** if unchanged.
+
