@@ -66,7 +66,7 @@ Adds or updates knowledge of the provided language to the selected Character. Pr
 -**Target required:** Token representing a Character Sheet
 - **Example:** !tongues --unset Draconic
 
-Removes knowledge of the provided language from the selected Character. If the character has an ability named "Tongues" this command will run a ***!target --ability*** command for the selected Character once language knowledge is removed.
+Removes knowledge of the provided language from the selected Character. If the character has an ability named "Tongues" this command will run a ***!tongues --ability*** command for the selected Character once language knowledge is removed.
 ## !tongues --speaker (name)
 -**Configuration command:** Yes
 -**Target required:** None
