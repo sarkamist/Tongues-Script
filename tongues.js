@@ -3,12 +3,18 @@ var Tongues = Tongues || (function(){
     
     //---- INFO ----//
     
-    var script = { name: 'Tongues', version: '4.3.1'},
+    var script = { name: 'Tongues', version: '4.4.0'},
+        devMode = false,
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
     
     startup = function(){
+        if (!state.Tongues || devMode){
+            state.Tongues = { savedSpeaker: 'John Smith'};
+            log('> ' + script.name + ' (v' + script.version + ') created new state storage <');
+        }
+        
         var handouts = findObjs({                              
               _type: 'handout',
         }, {caseInsensitive: true});
@@ -210,14 +216,18 @@ var Tongues = Tongues || (function(){
         });
         sendChat('Tongues', '/w ' + msg.who + ' ' + command[3] + ' language template succesfully created!', null, {noarchive:true});
     },
+    commandSpeaker = function(msg, command){
+        state.Tongues.savedSpeaker = command[3];
+        sendChat('Tongues', '/w ' + msg.who + 'Unknown speaker successfully changed!', null, {noarchive:true});
+    },
     commandSpeak = function(msg, command){
-        if (!msg.selected){
+        if (!msg.selected && !playerIsGM(msg.playerid)){
             sendChat('Tongues', '/w ' + msg.who + ' You must select a character token!', null, {noarchive:true});
-        } else if (msg.selected.length > 1){
+        } else if (msg.selected && msg.selected.length > 1){
             sendChat('Tongues', '/w ' + msg.who + ' You must select only one character token!', null, {noarchive:true});
         } else {
-            var token = getObj('graphic', msg.selected[0]._id);
-            var speakerId = token.get('represents');
+            var token = (msg.selected)?getObj('graphic', msg.selected[0]._id):null;
+            var speakerId = (token)?token.get('represents'):'#' + state.Tongues.savedSpeaker;
             var languageName = command[2];
             var text = command[3];
             if (languages[languageName] && languages[languageName].obj){
@@ -240,7 +250,6 @@ var Tongues = Tongues || (function(){
             }
         }
     },
-    
     translate = function(speakerId, languageName, text, learning, translate = true){
         _.each(Object.keys(languages[languageName].dictionary), function(key){
             var pattern = new RegExp(key, 'ig');
@@ -297,7 +306,11 @@ var Tongues = Tongues || (function(){
             //TRANSLATED
             return word;
         });
-        sendChat('character|' + speakerId, '[' + languageName + '] ' + translatedText);
+        if (speakerId.startsWith('#')){
+            sendChat(speakerId.replace('#', ''), '[' + languageName + '] ' + translatedText);
+        } else {
+            sendChat('character|' + speakerId, '[' + languageName + '] ' + translatedText);
+        }
         sendChat('Tongues - GM', '/w GM' + ' [' + languageName + '] ' + originalText);
         if (translate){
             _.each(languages[languageName].speakers, function(speaker){
@@ -353,6 +366,9 @@ var Tongues = Tongues || (function(){
         }
     },
     isLanguageSpeaker = function(speakerId, speakers) {
+        if(speakerId.startsWith('#')){
+            return false;
+        }
         var character = getObj('character', speakerId);
         var learning = null;
         if (character){
@@ -412,6 +428,8 @@ var Tongues = Tongues || (function(){
                             commandSet(msg, command);
                         } else if (command[2] == '--unset' && command[3]) {
                             commandSet(msg, command, true);
+                        } else if (command[2] == '--speaker' && command[3]) {
+                            commandSpeaker(msg, command);
                         } else {
                             sendChat('Tongues', '/w ' + msg.who + ' Invalid command!', null, {noarchive:true});
                         }
