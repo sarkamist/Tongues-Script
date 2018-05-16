@@ -65,7 +65,7 @@ Changes a configuration parameter value in order to change some of the script's 
 - ***show:*** Displays the current configuration settings.
 - ***reset:*** Whenever called, resets the script's state, loading a fresh configuration. Useful when upgrading to a new version.
 - ***showTokenName:true/false):*** While ***true*** displays the selected token name instead of the character name. Defaults to ***false*** on fresh scripts.
-- ***displayLanguageName:true/false):*** While ***true*** displays the language name on the translated text message. While **false** only the GM and characters who know the language will know which language has been spoken. Defaults to ***true*** on fresh scripts.
+- ***displayLanguageName:true/false):*** While ***true*** displays the language name on the translated text message. While false only the GM and characters which know the spoken language will see the language name. Defaults to ***true*** on fresh scripts.
 ## !tongues --ability
 - **Configuration command:** Yes
 - **Target required:** Token representing a Character Sheet
