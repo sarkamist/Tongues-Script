@@ -7,7 +7,7 @@ A simple script to simulate languages on Roll20 and show the translation only to
 3. [Available commands](#available-commands)
    - [!tongues (language) (message)](#tongues-language-message)
    - [!tongues --create (language)](#tongues---create-language)
-   - [!tongues --config (parameter:true|false)](#tongues---config-parametertruefalse)
+   - [!tongues --config (parameter:true/false)](#tongues---config-parametertruefalse)
    - [!tongues --ability](#tongues---ability)
    - [!tongues --set (language:knowledge%)](#tongues---set-languageknowledge)
    - [!tongues --unset (language)](#tongues---unset-language)
