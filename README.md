@@ -5,6 +5,13 @@ A simple script to simulate languages on Roll20 and show the translation only to
 1. [Installation](#installation)
 2. [Usage](#usage)
 3. [Available commands](#available-commands)
+   - [!tongues (language) (message)](#tongues-language-message)
+   - [!tongues --create (language)](#tongues---create-language)
+   - [!tongues --config (parameter:true|false)](#tongues---config-parametertruefalse)
+   - [!tongues --ability](#tongues---ability)
+   - [!tongues --set (language:knowledge%)](#tongues---set-languageknowledge)
+   - [!tongues --unset (language)](#tongues---unset-language)
+   - [!tongues --speaker (name)](#tongues---speaker-name)
 
 # Installation
 - Add a new script on Settings -> API Scripts of the game you want to install the script in
@@ -56,8 +63,8 @@ Creates a new handout template named after the provided language.
 
 Changes a configuration parameter value in order to change some of the script's functionalities. These are the current available parameters:
 - ***showTokenName(true/false):*** While ***true*** displays the selected token name instead of the character name. Defaults to ***false*** on fresh scripts.
-- ***displayLanguageName(true/false):*** While ***true*** displays the language name on the translated text message (only characters who know the language will know which language has been spoken).
-- ***resetState:*** When called resets the script's state, loading a fresh configuration. Useful when upgrading to a new version.
+- ***displayLanguageName(true/false):*** While ***true*** displays the language name on the translated text message (only the GM and characters who know the language will know which language has been spoken).
+- ***resetState:*** Whenever called, resets the script's state, loading a fresh configuration. Useful when upgrading to a new version.
 ## !tongues --ability
 - **Configuration command:** Yes
 - **Target required:** Token representing a Character Sheet
