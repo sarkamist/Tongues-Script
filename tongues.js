@@ -3,7 +3,7 @@ var Tongues = Tongues || (function(){
     
     //---- INFO ----//
     
-    var script = { name: 'Tongues', version: '4.5.0'},
+    var script = { name: 'Tongues', version: '4.5.1'},
         devMode = false,
         languages = {},
     
@@ -11,12 +11,7 @@ var Tongues = Tongues || (function(){
     
     startup = function(){
         if (!state.Tongues || devMode){
-            state.Tongues = {
-                savedSpeaker: 'John Smith',
-                showTokenName: false,
-                displayLanguageName: true
-            };
-            log('> ' + script.name + ' (v' + script.version + ') created new state storage <');
+            resetState();
         }
         
         var handouts = findObjs({                              
@@ -27,6 +22,15 @@ var Tongues = Tongues || (function(){
         });
         
         log('> ' + script.name + ' (v' + script.version + '): Found ' + Object.keys(languages).length + ' languages <');
+    },
+    resetState = function(){
+        state.Tongues = {
+            savedSpeaker: 'John Smith',
+            showTokenName: false,
+            displayLanguageName: true,
+            version: script.version
+        };
+        log('> ' + script.name + ' (v' + script.version + ') created new state storage <');
     },
     
     loadHandout = function(handout, reload=true){
@@ -110,22 +114,27 @@ var Tongues = Tongues || (function(){
     },
     
     commandConfig = function(msg, command){
-        switch (command[3]){
-            case 'displayLanguageName:true':
-                state.Tongues.displayLanguageName = true;
-                sendChat('Tongues', '/w ' + msg.who + ' Configuration parameter [displayLanguageName] successfully changed to TRUE!', null, {noarchive:true});
+        var param = command[3].split(":");
+        var bool = (param[1] === 'true');
+        switch (param[0]){
+            case 'show':
+                var text = '<br>';
+                text += '[savedSpeaker] ' + state.Tongues.savedSpeaker + '<br>';
+                text += '[showTokenName] ' + state.Tongues.showTokenName + '<br>';
+                text += '[displayLanguageName] ' + state.Tongues.displayLanguageName + '<br>';
+                sendChat('Tongues', '/w ' + msg.who + text, null, {noarchive:true});
                 break;
-            case 'displayLanguageName:false':
-                state.Tongues.displayLanguageName = false;
-                sendChat('Tongues', '/w ' + msg.who + ' Configuration parameter [displayLanguageName] successfully changed to FALSE!', null, {noarchive:true});
+            case 'reset':
+                resetState();
+                sendChat('Tongues', '/w ' + msg.who + 'Configuration successfully restored to default!', null, {noarchive:true});
                 break;
-            case 'showTokenName:true':
-                state.Tongues.showTokenName = true;
-                sendChat('Tongues', '/w ' + msg.who + ' Configuration parameter [showTokenName] successfully changed to TRUE!', null, {noarchive:true});
+            case 'displayLanguageName':
+                state.Tongues.displayLanguageName = bool;
+                sendChat('Tongues', '/w ' + msg.who + '<br>[displayLanguageName]<br> Successfully changed to ' + bool + '!', null, {noarchive:true});
                 break;
-            case 'showTokenName:false':
-                state.Tongues.showTokenName = false;
-                sendChat('Tongues', '/w ' + msg.who + ' Configuration parameter [showTokenName] successfully changed to FALSE!', null, {noarchive:true});
+            case 'showTokenName':
+                state.Tongues.showTokenName = bool;
+                sendChat('Tongues', '/w ' + msg.who + '<br>[showTokenName]<br> Successfully changed to ' + bool + '!', null, {noarchive:true});
                 break;
             default:
                 sendChat('Tongues', '/w ' + msg.who + ' That configuration parameter does not exist!', null, {noarchive:true});
@@ -261,11 +270,9 @@ var Tongues = Tongues || (function(){
         } else {
             var token = (msg.selected)?getObj('graphic', msg.selected[0]._id):null;
             var speakerId = (token)?token.get('represents'):'#' + state.Tongues.savedSpeaker;
-            log('speakerId Init: ' + speakerId);
             if (!speakerId || speakerId == ''){
-                speakerId = '#' + token.get('name');
+                speakerId = '#' + getTokenName(token);
             }
-            log('speakerId Tested: ' + speakerId);
             var languageName = command[2];
             var text = command[3];
             if (languages[languageName] && languages[languageName].obj){
@@ -345,20 +352,14 @@ var Tongues = Tongues || (function(){
             return word;
         });
         var speaker;
-        log('stn: ' + state.Tongues.showTokenName);
         if (state.Tongues.showTokenName){
-            log('stn: true event');
-            speaker = token.get('name');
+            speaker = getTokenName(token);
         } else if (speakerId.startsWith('#')){
-            log('stn: else if event');
             speaker = speakerId.replace('#', '');
         } else {
-            log('stn: else event');
             speaker = 'character|' + speakerId;
         }
-        log(speaker);
         
-        log('dln: ' + state.Tongues.displayLanguageName);
         if (state.Tongues.displayLanguageName){
             sendChat(speaker, '[' + languageName + '] ' + translatedText);
         } else {
@@ -461,6 +462,14 @@ var Tongues = Tongues || (function(){
         }
     
         return result;
+    },
+    getTokenName = function(token) {
+        var name = token.get('name');
+        if (!name || name == ''){
+            name = state.Tongues.savedSpeaker;
+        }
+        
+        return name;
     },
     
     //----- INPUT HANDLER -----//
