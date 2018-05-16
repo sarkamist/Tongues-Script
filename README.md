@@ -56,7 +56,7 @@ Creates a new handout template named after the provided language.
 
 Changes a configuration parameter value in order to change some of the script's functionalities. These are the current available parameters:
 - ***showTokenName(true/false):*** While ***true*** displays the selected token name instead of the character name. Defaults to ***false*** on fresh scripts.
-- ***display(true/false):*** While ***true*** displays the selected token name instead of the character name. Defaults to ***true*** on fresh scripts.
+- ***displayLanguageName(true/false):*** While ***true*** displays the language name on the translated text message (only characters who know the language will know which language has been spoken).
 - ***resetState:*** When called resets the script's state, loading a fresh configuration. Useful when upgrading to a new version.
 ## !tongues --ability
 - **Configuration command:** Yes
