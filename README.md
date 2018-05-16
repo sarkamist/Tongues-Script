@@ -56,7 +56,7 @@ The GM always gets the whole original message plus any translation from any Char
 - **Example:** !tongues --create Draconic
 
 Creates a new handout template named after the provided language.
-## !tongues --config (parameter:true|false)
+## !tongues --config (parameter:true/false)
 - **Configuration command:** Yes
 - **Target required:** None
 - **Example:** !tongues --config showTokenName:false | !tongues --config showTokenName:true
@@ -64,8 +64,8 @@ Creates a new handout template named after the provided language.
 Changes a configuration parameter value in order to change some of the script's functionalities. These are the current available parameters:
 - ***show:*** Displays the current configuration settings.
 - ***reset:*** Whenever called, resets the script's state, loading a fresh configuration. Useful when upgrading to a new version.
-- ***showTokenName(true/false):*** While ***true*** displays the selected token name instead of the character name. Defaults to ***false*** on fresh scripts.
-- ***displayLanguageName(true/false):*** While ***true*** displays the language name on the translated text message (only the GM and characters who know the language will know which language has been spoken).
+- ***showTokenName:true/false):*** While ***true*** displays the selected token name instead of the character name. Defaults to ***false*** on fresh scripts.
+- ***displayLanguageName:true/false):*** While ***true*** displays the language name on the translated text message. While **false** only the GM and characters who know the language will know which language has been spoken. Defaults to ***true*** on fresh scripts.
 ## !tongues --ability
 - **Configuration command:** Yes
 - **Target required:** Token representing a Character Sheet
