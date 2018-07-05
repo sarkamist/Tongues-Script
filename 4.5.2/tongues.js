@@ -4,7 +4,7 @@ var Tongues = Tongues || (function(){
     //---- INFO ----//
     
     var script = { name: 'Tongues', version: '4.5.1'},
-        devMode = true,
+        devMode = false,
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
