@@ -2,10 +2,14 @@
     "name": "Tongues",
     "script": "tongues.js",
     "version": "4.5.2",
+    "previousversions": [],
     "description": "A simple script to simulate languages on Roll20 and show the translation only to those characters that know the language.",
     "authors": "Sarkamist",
     "roll20userid": "704918",
+    "useroptions": [],
+    "dependencies": [],
     "modifies": {
         "state.Tongues": "read,write"
-    }
+    },
+    "conflicts": []
 }
