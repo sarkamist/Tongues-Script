@@ -4,7 +4,7 @@ var Tongues = Tongues || (function(){
     //---- INFO ----//
     
     var script = { name: 'Tongues', version: '4.5.1'},
-        devMode = false,
+        devMode = true,
         languages = {},
     
     //---- PRIVATE FUNCTIONS ----//
@@ -43,15 +43,16 @@ var Tongues = Tongues || (function(){
             languages[languageName].obj = handout;
             if (languages[languageName].obj){
                 languages[languageName].obj.get('notes', function(notes){
-                    if (notes && notes != 'null'){
+                    if (textIsValid(notes)){
+                        dLog(languageName + ' is valid!');
                         var matches = notes.match(/(\[.*?\])/igm);
                         languages[languageName].dictionary = {};
                         languages[languageName].vocabulary = [];
                         for (var i = 0; i < matches.length; i++){
                             if(matches[i].match(/(\[.+:.+\])/igm)){
                                 matches[i] = matches[i].replace(/\[([^\[\]]+)\]/ig, '$1');
-                                var words = matches[i].toLowerCase().split(':');
-                                var originals = words[0].split(',');
+                                var words = matches[i].toLowerCase().split(/\s*:\s*/);
+                                var originals = words[0].split(/\s*,\s*/);
                                 var translation = words[1];
                                 _.each(originals, function(original){
                                     languages[languageName].dictionary[original.trim()] = translation.trim();
@@ -60,18 +61,20 @@ var Tongues = Tongues || (function(){
                                 languages[languageName].vocabulary[i] = null;
                             } else {
                                 matches[i] = matches[i].replace(/\[([^\[\]]+)\]/ig, '$1');
-                                languages[languageName].vocabulary[i] = matches[i].split(', ');
+                                languages[languageName].vocabulary[i] = matches[i].split(/\s*,\s*/);
                             }
                         }
                         if (reload){
                             log('> ' + script.name + ' (v' + script.version + '): ' + languageName + ' parsed succesfully! (' + Object.keys(languages).length + ' languages loaded) <');
                         }
                         languages[languageName].obj.get('gmnotes', function(gmnotes){
-                            if (gmnotes && gmnotes != 'null'){
+                            if (textIsValid(gmnotes)){
+                                dLog(languageName + ' speakers are valid!');
                                 languages[languageName].speakers = [];
-                                var languageSpeakers = gmnotes.split(',');
+                                var languageSpeakers = gmnotes.replace(/<.*?>/g,'').split(/\s*,\s*/);
+                                dLog(languageName + ' speakers: ' + languageSpeakers);
                                 _.each(languageSpeakers, function(languageSpeaker){
-                                    languageSpeaker = languageSpeaker.split(':');
+                                    languageSpeaker = languageSpeaker.split(/\s*:\s*/);
                                     if (languageSpeaker[1]){
                                         languages[languageName].speakers.push({
                                             name: languageSpeaker[0].trim(),
@@ -114,7 +117,7 @@ var Tongues = Tongues || (function(){
     },
     
     commandConfig = function(msg, command){
-        var param = command[3].split(":");
+        var param = command[3].split(/\s*:\s*/);
         var bool = (param[1] === 'true');
         switch (param[0]){
             case 'show':
@@ -188,7 +191,7 @@ var Tongues = Tongues || (function(){
         } else {
             var token = getObj('graphic', msg.selected[0]._id);
             var character = getObj('character', token.get('represents'));
-            var params = command[3].split(':');
+            var params = command[3].split(/\s*:\s*/);
             var languageName = params[0].trim();
             var languageLearning = undefined;
             if (params[1]) {
@@ -196,25 +199,23 @@ var Tongues = Tongues || (function(){
             }
             if (languages[languageName]){
                 languages[languageName].obj.get('gmnotes', function(gmnotes){
-                    if (gmnotes && gmnotes != ''){
-                        var speakers = gmnotes.split(',');
-                    
+                    if (textIsValid(gmnotes)){
+                        var speakers = gmnotes.split(/\s*,\s*/);
                         var speaker = _.find(speakers, function(speaker){
-                            var speaker = speaker.trim().split(':');
+                            var speaker = speaker.trim().split(/\s*:\s*/);
                             if(speaker[0] == character.get('name')){
                                 var pattern = new RegExp('[\,\ ]*' + speaker[0], 'igm');
                                 if (speaker[1]){
                                     pattern = new RegExp('[\,\ ]*' + speaker[0] + ':' + speaker[1], 'igm');
                                 }
                                 gmnotes = gmnotes.replace(pattern, '');
-                                gmnotes += (gmnotes)? ', ':'';
                             }
                         });
                     } else {
                         gmnotes = '';
                     }
                     
-                    var text = gmnotes + character.get('name');
+                    var text = ((gmnotes)? gmnotes + ', ':'') + character.get('name');
                     if(languageLearning){
                         text += ':' + languageLearning + '%';
                     }
@@ -471,6 +472,14 @@ var Tongues = Tongues || (function(){
         
         return name;
     },
+    textIsValid = function(string) {
+        return (
+            string &&
+            string != '' &&
+            string != 'null' &&
+            !string.match(/^<.*?>/g)
+        );
+    },
     
     //----- INPUT HANDLER -----//
     
@@ -515,6 +524,10 @@ var Tongues = Tongues || (function(){
     
     //---- PUBLIC FUNCTIONS ----//
     
+    dLog = function(message){
+        if (devMode) log(message);
+    },
+    
     registerEventHandlers = function(){
 		on('chat:message', handleInput);
 		on('change:handout', loadHandout);
@@ -525,6 +538,8 @@ var Tongues = Tongues || (function(){
         log('> ' + script.name + ' (v' + script.version + ') is installed and running <');
         startup();
     };
+    
+    
     
     return {
 		checkInstall: checkInstall,
